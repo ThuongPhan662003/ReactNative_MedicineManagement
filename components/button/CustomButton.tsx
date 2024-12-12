@@ -29,7 +29,7 @@ export default CustomButton;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#005EB5',
+    backgroundColor: '#64C2B2',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 5,

@@ -1,29 +1,30 @@
-import { Alert } from "react-native";
-import { useEffect, useState } from "react";
+  import { useState, useEffect } from 'react';
 
-const useAppwrite = <T>(fn: () => Promise<T>) => {
-  const [data, setData] = useState<T | null>(null); // Thêm hỗ trợ kiểu dữ liệu generic
-  const [loading, setLoading] = useState(true);
+  // Custom hook để gọi API Appwrite
+  const useAppwrite = (apiCall: Function, deps: any[] = [], immediate: boolean = true) => {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<any>(null);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const res = await fn();
-      setData(res);
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "An error occurred");
-    } finally {
-      setLoading(false);
-    }
+    useEffect(() => {
+      if (immediate) {
+        fetchData();
+      }
+    }, deps); // Chạy lại khi dependencies thay đổi
+
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await apiCall(...deps);
+        setData(response);
+        setLoading(false);
+      } catch (err) {
+        setError(err);
+        setLoading(false);
+      }
+    };
+
+    return { data, loading, error };
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const refetch = () => fetchData();
-
-  return { data, loading, refetch };
-};
-
-export default useAppwrite;
+  export default useAppwrite;

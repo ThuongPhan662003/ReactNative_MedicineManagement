@@ -10,54 +10,58 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { getAllPatients } from "@/services/patientService"; // Import hàm lấy danh sách bệnh nhân
-import useAppwrite from "@/lib/useAppwrite"; // Hook custom
 import SearchBar from "@/components/SearchBar"; // Đảm bảo SearchBar được import
 import Nav from "@/components/Nav";
-import { ExternalLink } from "@/components/ExternalLink";
-import IconComponent from "@/components/IconComponent";
-import { Patient } from "@/constants/types"; // Import interface Patient
 import { Link, router } from "expo-router";
+import IconComponent from "@/components/IconComponent";
+import { getPatients } from "@/services/patientService"; // Import hàm lấy danh sách bệnh nhân qua axios
 
 export default function List() {
-  const {
-    data: patients,
-    loading,
-    error,
-  } = useAppwrite<Patient[]>(getAllPatients); // Hook custom
-
-  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
+  const [patients, setPatients] = useState([]);
+  const [filteredPatients, setFilteredPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // UseEffect để chỉ gọi fetch 1 lần khi dữ liệu được load lần đầu
-  useEffect(() => {
-    if (patients && patients.length > 0 && filteredPatients.length === 0) {
-      setFilteredPatients(patients); // Chỉ set filteredPatients một lần
+  // Fetch dữ liệu bệnh nhân từ API qua hàm getPatients
+  const fetchPatients = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await getPatients(); // Gọi hàm getPatients
+      setPatients(data);
+      setFilteredPatients(data);
+    } catch (err) {
+      setError(err.message || "Error fetching data");
+    } finally {
+      setLoading(false);
     }
-  }, [patients, filteredPatients]); // Chỉ gọi khi patients có thay đổi và filteredPatients còn trống
+  };
 
-  console.log("patients", patients);
+  useEffect(() => {
+    fetchPatients();
+  }, []);
 
   const handleSearchPatients = (text: string) => {
     setSearchTerm(text);
-    const filtered = patients?.filter((patient) =>
+    const filtered = patients.filter((patient) =>
       patient.full_name.toLowerCase().includes(text.toLowerCase())
     );
-    setFilteredPatients(filtered || []);
+    setFilteredPatients(filtered);
   };
 
   const handleClear = () => {
-    setFilteredPatients(patients || []); // Reset lại danh sách khi xóa tìm kiếm
+    setFilteredPatients(patients);
     setSearchTerm("");
   };
 
-  // if (loading) {
-  //   return (
-  //     <View style={styles.loadingContainer}>
-  //       <ActivityIndicator size="large" color="#6200EE" />
-  //     </View>
-  //   );
-  // }
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6200EE" />
+      </View>
+    );
+  }
 
   if (error) {
     return (
@@ -77,7 +81,7 @@ export default function List() {
         externalLink="patients/details"
         name="back"
         color="#FFFFFF"
-        status={true}
+        status={false}
       />
 
       <SearchBar
@@ -113,13 +117,6 @@ export default function List() {
                 {item.full_name}
               </Text>
               <Text style={[styles.column, styles.detailText]}>
-                {/* <TouchableOpacity
-                  style={[styles.column, styles.detailText]}
-                  onPress={() => router.push(`/patients/${item.id}`)} // Điều hướng tới trang chi tiết
-                >
-                  <IconComponent name="detail" size={22} color="#000000" />
-                </TouchableOpacity>
-                */}
                 <Link
                   href={{
                     pathname: "/patients/[id]",
@@ -133,9 +130,10 @@ export default function List() {
           )}
         />
       </ScrollView>
+
       <TouchableOpacity
         style={[styles.column, styles.detailText]}
-        onPress={() => router.push(`/patients/add`)} // Điều hướng tới trang chi tiết
+        onPress={() => router.push(`/patients/add`)}
       >
         <IconComponent name="detail" size={22} color="#000000" />
       </TouchableOpacity>
@@ -202,13 +200,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 20,
-  },
-  retryText: {
-    color: "#6200EE",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-    textDecorationLine: "underline",
-    paddingTop: 10,
   },
 });

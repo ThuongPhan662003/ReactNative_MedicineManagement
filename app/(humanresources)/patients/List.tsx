@@ -14,12 +14,13 @@ import SearchBar from "@/components/SearchBar"; // Đảm bảo SearchBar đư�
 import Nav from "@/components/Nav";
 import { Link, router } from "expo-router";
 import IconComponent from "@/components/IconComponent";
-import { getPatients } from "@/services/patientService"; // Import hàm lấy danh sách bệnh nhân qua axios
+import { searchPatients } from "@/services/patientService"; // Import hàm searchPatients
 import CustomButton from "@/components/button/CustomButton";
+import { ExternalLink } from "@/components/ExternalLink";
 
 export default function List() {
-  const [patients, setPatients] = useState([]);
-  const [filteredPatients, setFilteredPatients] = useState([]);
+  const [patients, setPatients] = useState<any[]>([]);
+  const [filteredPatients, setFilteredPatients] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -29,7 +30,7 @@ export default function List() {
     setLoading(true);
     setError("");
     try {
-      const data = await getPatients(); // Gọi hàm getPatients
+      const data = await searchPatients({ search: "" }); // Lấy tất cả bệnh nhân ban đầu
       setPatients(data);
       setFilteredPatients(data);
     } catch (err) {
@@ -43,22 +44,36 @@ export default function List() {
     fetchPatients();
   }, []);
 
-  const handleSearchPatients = (text: string) => {
+  const handleSearchPatients = async (text: string) => {
     setSearchTerm(text);
-    const filtered = patients.filter((patient) =>
-      patient.full_name.toLowerCase().includes(text.toLowerCase())
-    );
-    setFilteredPatients(filtered);
+    if (text === "") {
+      // Nếu không có tìm kiếm, hiển thị lại tất cả bệnh nhân
+      setFilteredPatients(patients);
+    } else {
+      // Gọi hàm searchPatients để tìm kiếm bệnh nhân theo từ khóa
+      setLoading(true);
+      try {
+        const result = await searchPatients({ search: text });
+        setFilteredPatients(result); // Cập nhật danh sách bệnh nhân sau khi tìm kiếm
+      } catch (err) {
+        setError('Error searching patients');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   const handleClear = () => {
     setFilteredPatients(patients);
     setSearchTerm("");
   };
-const handleAddPatient = () => {
-    // Điều hướng đến trang "add-patient" (bạn có thể thay đổi đường dẫn này)
+
+  const handleAddPatient = () => {
+    // Điều hướng đến trang "add-patient"
     router.push('/patients/add');
   };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -81,7 +96,7 @@ const handleAddPatient = () => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <Nav
-        title="PATIENT MANAGEMENT"
+        title="PATIENT"
         externalLink="patients/details"
         name="back"
         color="#FFFFFF"
@@ -108,9 +123,7 @@ const handleAddPatient = () => {
                 <Text style={[styles.headercolumn, styles.fullNameText]}>
                   Full name
                 </Text>
-                <Text style={[styles.headercolumn, styles.detailText]}>
-                  Detail
-                </Text>
+                <Text style={[styles.headercolumn, styles.detailText]}>Detail</Text>
               </View>
             </View>
           }
@@ -127,8 +140,7 @@ const handleAddPatient = () => {
                     params: { id: `${item.id}` },
                   }}
                 >
-                  {/* <Text style={styles.detailText}>View Details</Text> */}
-                  <IconComponent name={"detail"} size={20} color="#000000"/>
+                  <IconComponent name={"detail"} size={20} color="#000000" />
                 </Link>
               </Text>
             </View>
@@ -136,12 +148,6 @@ const handleAddPatient = () => {
         />
       </ScrollView>
 
-      {/* <TouchableOpacity
-        style={[styles.column, styles.detailText]}
-        onPress={() => router.push(`/patients/add`)}
-      >
-        <IconComponent name="detail" size={22} color="#000000" />
-      </TouchableOpacity> */}
       <TouchableOpacity style={styles.button} onPress={handleAddPatient}>
         <Text style={styles.buttonText}>Thêm bệnh nhân</Text>
       </TouchableOpacity>
@@ -209,22 +215,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 20,
   },
-  buttonstyle:{
-    borderStyle:"solid",
-    backgroundColor:"#005EB5"
-
-
-  },
   button: {
-    borderStyle:"solid",
     backgroundColor: '#005EB5',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
-    width:"40%",
-    textAlign:"center",
-    margin:"auto",
-    marginBottom:30
+    width: "40%",
+    textAlign: "center",
+    marginBottom: 30,
+    alignSelf: "center",
   },
   buttonText: {
     color: '#fff',

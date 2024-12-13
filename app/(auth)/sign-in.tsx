@@ -40,7 +40,7 @@ const SignIn = () => {
         // Xử lý đăng nhập thành công
         Alert.alert('Thành công', 'Đăng nhập thành công!');
         console.log('User Info:', data);
-        router.push('/patients/List' )
+        router.push('/patients/3' )
         // Chuyển hướng hoặc lưu token
       } else {
         // Xử lý lỗi đăng nhập

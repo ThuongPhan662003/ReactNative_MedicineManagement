@@ -1,7 +1,7 @@
-// components/CircleButton.tsx
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Linking } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Linking, Alert } from 'react-native';
 import IconComponent from '@/components/IconComponent'; // Import IconComponent
+import { Link } from 'expo-router'; // Import Link for internal navigation
 
 interface CircleButtonProps {
   iconName: string; // Tên icon từ IconComponent
@@ -24,15 +24,31 @@ const CircleButton: React.FC<CircleButtonProps> = ({
   color = 'black', // Màu mặc định là đen nếu không truyền màu
   url,
 }) => {
-  const handlePress = () => {
+  const handlePress = async () => {
     onPress();
-    Linking.openURL(url).catch((err) => console.error("Failed to open URL:", err)); // Catch lỗi nếu không mở được URL
+
+    // Check if the URL is external (starts with 'http' or 'https')
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      // External URL - Open it in the browser
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        Linking.openURL(url).catch((err) => console.error('Failed to open URL:', err));
+      } else {
+        Alert.alert('Invalid URL', 'The provided URL cannot be opened.');
+      }
+    } else {
+      // Internal URL - Use Expo Router Link for internal navigation
+      // This will allow you to navigate within the app without opening a new tab
+      // Internal link handling, no need to open in browser
+      console.log('Navigating to internal path:', url);
+      return <Link href={url} />;
+    }
   };
 
   return (
     <TouchableOpacity style={[styles.container, { width: size, height: size }]} onPress={handlePress}>
       <View
-        style={[styles.outerCircle, { width: size, height: size, backgroundColor: backgroundColor, borderColor: borderColor }]}>
+        style={[styles.outerCircle, { width: size, height: size, backgroundColor: backgroundColor, borderColor: borderColor }]} >
         <View style={[styles.innerCircle, { width: size * 0.6, height: size * 0.6 }]}>
           <IconComponent
             name={iconName} // Truyền tên icon

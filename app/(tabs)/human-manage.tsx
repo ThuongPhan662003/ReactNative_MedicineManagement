@@ -1,18 +1,22 @@
 // screens/HomeScreen.tsx
 import React from "react";
-import { ScrollView, View, StyleSheet, Button } from "react-native";
+import { ScrollView, View, StyleSheet, Button, Text } from "react-native";
 import Nav from "@/components/Nav";
 import CircleButton from "@/components/CircleButton";
 // import { GiMedicinePills } from "react-icons/gi";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import SearchBar from "@/components/SearchBar";
 import { useNavigation } from "expo-router";
+import { useGlobalContext } from "@/context/GlobalContext";
+
 const handleSearch = (searchTerm: string) => {
     console.log('Searching for:', searchTerm);
     // Thực hiện tìm kiếm với từ khóa searchTerm
   };
 const HomeScreen = ({}) => {
   const navigation = useNavigation();
+  const { isLogged, employee_id, token, setIsLogged, setEmployeeId, setToken } = useGlobalContext();
+
   return (
     <View style={styles.container}>
       {/* Thanh điều hướng */}
@@ -75,6 +79,14 @@ const HomeScreen = ({}) => {
             color="#005EB5" // Màu icon là đỏ
             path="/patients/List" // Đường dẫn cho navigation 
           />
+
+          {/* Hiển thị thông tin từ GlobalContext */}
+      {isLogged && (
+        <View >
+          <Text >Employee ID: {employee_id}</Text>
+          <Text >Token: {token}</Text>
+        </View>
+      )}
         </View>
       </ScrollView>
       <Button

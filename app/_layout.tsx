@@ -1,45 +1,58 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack, router } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import { Stack, router } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import GlobalProvider,  { useGlobalContext, GlobalContextType }  from "@/context/GlobalContext";
+import "react-native-reanimated";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-import  {} from 'react'
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// Ngăn splash screen tự động ẩn
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function AppContent() {
   const colorScheme = useColorScheme();
+  const { isLogged, loading } = useGlobalContext(); // Sử dụng GlobalContext
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
 
   useEffect(() => {
-    if (loaded) {
+    if (loaded && !loading) {
       SplashScreen.hideAsync();
-      router.replace('/sign-in');
+      if (isLogged) {
+        router.replace("/human-manage"); // Điều hướng nếu đã đăng nhập
+      } else {
+        router.replace("/sign-in"); // Điều hướng tới trang đăng nhập
+      }
     }
-  }, [loaded]);
+  }, [loaded, loading, isLogged]);
 
-  if (!loaded) {
-    return null;
+  if (!loaded || loading) {
+    return null; // Hiển thị màn hình chờ
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
-        <Stack.Screen name="humanresource" options={{ headerShown: false }} /> {/* Màn hình humanresource */}
-        <Stack.Screen name="patients" options={{ headerShown: false }} /> {/* Màn hình patients */} 
+        <Stack.Screen name="humanresource" options={{ headerShown: false }} />
+        <Stack.Screen name="patients" options={{ headerShown: false }} />
 
         <Stack.Screen name="+not-found" />
       </Stack>
-      <StatusBar style="auto" />  
+      <StatusBar style="auto" />
     </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <GlobalProvider>
+      <AppContent />
+    </GlobalProvider>
   );
 }

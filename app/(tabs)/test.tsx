@@ -74,7 +74,7 @@ const HomeScreen = ({}) => {
             backgroundColor="#F0F0F0"
             borderColor="#005EB5"
             color="#005EB5" // Màu icon là đỏ
-            url="/humanresources/patients/list"
+            url="/patients/List"
           />
         </View>
       </ScrollView>

@@ -15,6 +15,7 @@ import Nav from "@/components/Nav";
 import { Link, router } from "expo-router";
 import IconComponent from "@/components/IconComponent";
 import { getPatients } from "@/services/patientService"; // Import hàm lấy danh sách bệnh nhân qua axios
+import CustomButton from "@/components/button/CustomButton";
 
 export default function List() {
   const [patients, setPatients] = useState([]);
@@ -54,7 +55,10 @@ export default function List() {
     setFilteredPatients(patients);
     setSearchTerm("");
   };
-
+const handleAddPatient = () => {
+    // Điều hướng đến trang "add-patient" (bạn có thể thay đổi đường dẫn này)
+    router.push('/patients/add');
+  };
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -123,7 +127,8 @@ export default function List() {
                     params: { id: `${item.id}` },
                   }}
                 >
-                  <Text style={styles.detailText}>View Details</Text>
+                  {/* <Text style={styles.detailText}>View Details</Text> */}
+                  <IconComponent name={"detail"} size={20} color="#000000"/>
                 </Link>
               </Text>
             </View>
@@ -131,11 +136,14 @@ export default function List() {
         />
       </ScrollView>
 
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={[styles.column, styles.detailText]}
         onPress={() => router.push(`/patients/add`)}
       >
         <IconComponent name="detail" size={22} color="#000000" />
+      </TouchableOpacity> */}
+      <TouchableOpacity style={styles.button} onPress={handleAddPatient}>
+        <Text style={styles.buttonText}>Thêm bệnh nhân</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );
@@ -200,5 +208,27 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 20,
+  },
+  buttonstyle:{
+    borderStyle:"solid",
+    backgroundColor:"#005EB5"
+
+
+  },
+  button: {
+    borderStyle:"solid",
+    backgroundColor: '#005EB5',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    width:"40%",
+    textAlign:"center",
+    margin:"auto",
+    marginBottom:30
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

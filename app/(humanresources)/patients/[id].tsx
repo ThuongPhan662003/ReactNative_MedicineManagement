@@ -18,6 +18,7 @@ import {
 import { Patient } from "@/constants/types";
 import Nav from "@/components/Nav";
 import { ThemedView } from "@/components/ThemedView";
+import IconComponent from "@/components/IconComponent";
 
 type PatientDetailRouteParams = {
   id: string;
@@ -164,6 +165,7 @@ const PatientDetail = () => {
         ].map((field) => (
           <View key={field.value} style={styles.inputContainer}>
             <Text style={styles.label}>{field.label}</Text>
+            
             <TextInput
               style={styles.input}
               value={formData[field.value]?.toString() || ""}
@@ -215,6 +217,8 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     marginBottom: 15,
+    display:"flex",
+    flexDirection:"row"
   },
   label: {
     fontSize: 14,

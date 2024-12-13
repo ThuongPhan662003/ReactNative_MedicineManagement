@@ -1,8 +1,9 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, GestureResponderEvent } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faStethoscope, faPills, faHeart, faChevronLeft, faUsers,faAddressBook,faMagnifyingGlass,faXmark ,faIdCardClip} from '@fortawesome/free-solid-svg-icons';
+import { faStethoscope, faPills, faHeart, faChevronLeft, faUsers,faAddressBook,faMagnifyingGlass,faXmark ,faIdCardClip,faPenToSquare,faCakeCandles,faIdCard,faPhone,faSuitcaseMedical,faLocationDot} from '@fortawesome/free-solid-svg-icons';
 // Định nghĩa ánh xạ tên biểu tượng với các đối tượng FontAwesome
+
 const icons = {
   stethoscope: faStethoscope,
   pills: faPills,
@@ -13,6 +14,12 @@ const icons = {
   search:faMagnifyingGlass,
   close:faXmark,
   detail:faIdCardClip,
+  edit:faPenToSquare,
+  birthday:faCakeCandles,
+  idCard:faIdCard,
+  phone:faPhone,
+  insurance:faSuitcaseMedical,
+  location:faLocationDot
 };
 
 // Props cho IconComponent

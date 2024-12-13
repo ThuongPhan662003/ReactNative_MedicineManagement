@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,51 +10,62 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-
 import { getAllPatients } from "@/services/patientService"; // Import hàm lấy danh sách bệnh nhân
 import useAppwrite from "@/lib/useAppwrite"; // Hook custom
 import SearchBar from "@/components/SearchBar"; // Đảm bảo SearchBar được import
 import Nav from "@/components/Nav";
 import { ExternalLink } from "@/components/ExternalLink";
 import IconComponent from "@/components/IconComponent";
-
 import { Patient } from "@/constants/types"; // Import interface Patient
+import { Link, router } from "expo-router";
 
 export default function List() {
-  const { data: patients, loading, refetch } = useAppwrite<Patient[]>(getAllPatients); // Sử dụng kiểu dữ liệu với useAppwrite
-  const [filteredPatients, setFilteredPatients] = useState<Patient[]>(patients || []);
+  const {
+    data: patients,
+    loading,
+    error,
+  } = useAppwrite<Patient[]>(getAllPatients); // Hook custom
+
+  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // UseEffect để chỉ gọi fetch 1 lần khi dữ liệu được load lần đầu
+  useEffect(() => {
+    if (patients && patients.length > 0 && filteredPatients.length === 0) {
+      setFilteredPatients(patients); // Chỉ set filteredPatients một lần
+    }
+  }, [patients, filteredPatients]); // Chỉ gọi khi patients có thay đổi và filteredPatients còn trống
+
+  console.log("patients", patients);
+
   const handleSearchPatients = (text: string) => {
     setSearchTerm(text);
     const filtered = patients?.filter((patient) =>
-      patient.name.toLowerCase().includes(text.toLowerCase())
+      patient.full_name.toLowerCase().includes(text.toLowerCase())
     );
     setFilteredPatients(filtered || []);
   };
 
   const handleClear = () => {
-    setFilteredPatients(patients || []);
+    setFilteredPatients(patients || []); // Reset lại danh sách khi xóa tìm kiếm
     setSearchTerm("");
   };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6200EE" />
-      </View>
-    );
-  }
-
-  // if (!patients || patients.length === 0) {
+  // if (loading) {
   //   return (
-  //     <View style={styles.errorContainer}>
-  //       <Text style={styles.errorText}>No patients found.</Text>
-  //       <Text onPress={refetch} style={styles.retryText}>
-  //         Retry
-  //       </Text>
+  //     <View style={styles.loadingContainer}>
+  //       <ActivityIndicator size="large" color="#6200EE" />
   //     </View>
   //   );
   // }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -99,19 +110,35 @@ export default function List() {
             <View style={styles.rowContainer}>
               <Text style={[styles.column, styles.cellText]}>{item.id}</Text>
               <Text style={[styles.column, styles.fullNameText]}>
-                {item.name}
+                {item.full_name}
               </Text>
               <Text style={[styles.column, styles.detailText]}>
-                <ExternalLink href={`/patients/${item.id}`}>
-                  <TouchableOpacity>
-                    <IconComponent name="detail" size={22} color="#000000" />
-                  </TouchableOpacity>
-                </ExternalLink>
+                {/* <TouchableOpacity
+                  style={[styles.column, styles.detailText]}
+                  onPress={() => router.push(`/patients/${item.id}`)} // Điều hướng tới trang chi tiết
+                >
+                  <IconComponent name="detail" size={22} color="#000000" />
+                </TouchableOpacity>
+                */}
+                <Link
+                  href={{
+                    pathname: "/patients/[id]",
+                    params: { id: `${item.id}` },
+                  }}
+                >
+                  <Text style={styles.detailText}>View Details</Text>
+                </Link>
               </Text>
             </View>
           )}
         />
       </ScrollView>
+      <TouchableOpacity
+        style={[styles.column, styles.detailText]}
+        onPress={() => router.push(`/patients/add`)} // Điều hướng tới trang chi tiết
+      >
+        <IconComponent name="detail" size={22} color="#000000" />
+      </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 }

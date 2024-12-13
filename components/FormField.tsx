@@ -1,14 +1,23 @@
-import { View, Text, TextInput, TouchableOpacity, Image, StyleProp, ViewStyle, TextStyle } from "react-native";
 import { useState } from "react";
-import icons from "../constants/icons";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  StyleProp,
+  ViewStyle,
+} from "react-native";
+
+import icons from "../constants/icons"; // Nếu icons chứa nhiều biểu tượng, dùng destructuring { eye, eyeHide }
 
 interface FormFieldProps {
   title: string;
   value: string;
   placeholder: string;
-  handleChangeText: (text: string) => void; // Hàm xử lý giá trị đầu vào, nhận vào một chuỗi
-  otherStyles?: StyleProp<ViewStyle>; // Các style bổ sung cho container
-  props?: any; // Các prop bổ sung có thể nhận vào từ ngoài
+  handleChangeText: (text: string) => void;
+  otherStyles?: StyleProp<ViewStyle>;
 }
 
 const FormField: React.FC<FormFieldProps> = ({
@@ -17,30 +26,28 @@ const FormField: React.FC<FormFieldProps> = ({
   placeholder,
   handleChangeText,
   otherStyles,
-  ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <View style={[styles.container, otherStyles]}>
-      <Text style={styles.titleText}>{title}</Text>
+      <Text style={styles.title}>{title}</Text>
 
       <View style={styles.inputContainer}>
         <TextInput
-          style={styles.input} // Thêm style mới cho màu chữ và nền
+          style={styles.input}
           value={value}
           placeholder={placeholder}
           placeholderTextColor="#7B7B8B"
           onChangeText={handleChangeText}
-          secureTextEntry={title === "Password" && !showPassword} // Hiển thị dạng * khi là password
-          {...props}
+          secureTextEntry={title === "Password" && !showPassword}
         />
 
         {title === "Password" && (
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <Image
-              style={styles.eyeIcon}
               source={!showPassword ? icons.eye : icons.eyeHide}
+              style={styles.icon}
               resizeMode="contain"
             />
           </TouchableOpacity>
@@ -50,41 +57,36 @@ const FormField: React.FC<FormFieldProps> = ({
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   container: {
-    marginVertical: 8,
-  } as StyleProp<ViewStyle>, // Áp dụng kiểu viewStyle cho container
-
-  titleText: {
-    fontSize: 16,
-    color: '#B0B0B0',
-    fontFamily: 'PMedium',
-  } as StyleProp<TextStyle>, // Áp dụng kiểu textStyle cho title
-
+    marginBottom: 8, // space-y-2
+  },
+  title: {
+    fontSize: 16, // text-base
+    color: "#B0B0B0", // text-gray-100
+    fontFamily: "Poppins-Medium", // font-pmedium
+  },
   inputContainer: {
     width: '100%',
-    height: 64,
-    paddingHorizontal: 16,
-    backgroundColor: '#1E1E1E',
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: '#2B2B2B',
-    flexDirection: 'row',
-    alignItems: 'center',
-  } as StyleProp<ViewStyle>, // Áp dụng kiểu viewStyle cho input container
-
+    height: 64, 
+    paddingHorizontal: 16, 
+    backgroundColor: '#F5F5F5', 
+    borderRadius: 16, 
+    borderWidth: 2, 
+    borderColor: '#E0E0E0', 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+  },
   input: {
     flex: 1,
-    color: '#000', // Màu chữ đen
-    backgroundColor: '#ffffff', // Nền trắng
-    fontFamily: 'PSemibold',
+    color: "#000000",
+    fontFamily: "Poppins-SemiBold",
     fontSize: 16,
-  } as StyleProp<TextStyle>, // Áp dụng kiểu textStyle cho TextInput
-
-  eyeIcon: {
+  },
+  icon: {
     width: 24,
     height: 24,
-  } as StyleProp<ViewStyle>, // Áp dụng kiểu viewStyle cho icon
-};
+  },
+});
 
 export default FormField;

@@ -6,12 +6,18 @@ interface CustomButtonProps {
   handlePress: () => void;
   containerStyles?: ViewStyle;
   textStyles?: TextStyle;
-  isLoading?: boolean; // Thêm kiểu boolean cho trường isLoading
+  isLoading?: boolean;
 }
 
-const CustomButton: React.FC<CustomButtonProps> = ({ title, handlePress, containerStyles, textStyles, isLoading }) => {
+const CustomButton: React.FC<CustomButtonProps> = ({
+  title,
+  handlePress,
+  containerStyles,
+  textStyles,
+  isLoading,
+}) => {
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       onPress={handlePress}
       activeOpacity={0.7}
       style={[styles.container, containerStyles]}
@@ -23,13 +29,13 @@ const CustomButton: React.FC<CustomButtonProps> = ({ title, handlePress, contain
       )}
     </TouchableOpacity>
   );
-}
+};
 
 export default CustomButton;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#64C2B2',
+    backgroundColor: '#53CCEC',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 5,

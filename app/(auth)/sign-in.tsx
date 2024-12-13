@@ -58,18 +58,18 @@ const SignIn = () => {
       <ScrollView contentContainerStyle={styles.scrollView}>
         <View style={styles.centerContent}>
           <Image source={loginLogin.logoLogin} style={styles.logo} />
-        </View>
-        <Text style={styles.welcomeText}>Get Started</Text>
-        <Text style={styles.subText}>Welcome back to the system</Text>
+  
+          <Text style={styles.welcomeText}>Get Started</Text>
+          <Text style={styles.subText}>Welcome back to the system</Text>
 
-        <FormField
-          title="Username"
-          value={form.username}
-          handleChangeText={(e) => setForm({ ...form, username: e })}
-          placeholder="Enter your username"
-          style={styles.formField}
-        />
-        <View style={styles.passwordContainer}>
+          <FormField
+            title="Username"
+            value={form.username}
+            handleChangeText={(e) => setForm({ ...form, username: e })}
+            placeholder="Enter your username"
+            style={styles.formField}
+          />
+
           <FormField
             title="Password"
             value={form.password}
@@ -77,24 +77,20 @@ const SignIn = () => {
             placeholder="Enter your password"
             style={styles.formField}
           />
-          <TouchableOpacity>
-            <Text style={styles.forgotPassword}>Quên mật khẩu?</Text>
-          </TouchableOpacity>
-        </View>
 
-        <CustomButton
-          title="Đăng nhập"
-          handlePress={submit}
-          isLoading={isSubmitting}
-          buttonStyle={styles.button}
-          textStyle={styles.buttonText}
-        />
+          <View style={styles.forgotPasswordContainer}>
+            <Link href="/sign-up">
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </Link>
+          </View>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Don’t have an account?</Text>
-          <Link href="/sign-up" style={styles.linkText}>
-            Sign Up
-          </Link>
+          <CustomButton
+            title="Đăng nhập"
+            handlePress={submit}
+            isLoading={isSubmitting}
+            containerStyles={styles.button} 
+            textStyles={styles.buttonText} 
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -141,21 +137,16 @@ const styles = StyleSheet.create({
     width: '100%',
     marginVertical: 8,
   },
-  passwordContainer: {
-    width: '100%',
-    position: 'relative',
-    marginBottom: 16,
+  forgotPasswordContainer: {
+    alignItems: 'flex-end',
+    marginTop: 16,
   },
-  forgotPassword: {
-    position: 'absolute',
-    right: 0,
-    top: 14,
+  forgotPasswordText: {
+    color: 'white',
     fontSize: 14,
-    color: '#FFF',
-    fontFamily: 'PSemiBold',
   },
+  
   button: {
-    backgroundColor: '#005EB5',
     paddingVertical: 16,
     borderRadius: 8,
     width: '100%',

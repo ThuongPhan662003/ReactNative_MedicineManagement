@@ -17,12 +17,12 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-      router.replace('/sign-in');
-    }
-  }, [loaded]);
+  // useEffect(() => {
+  //   if (loaded) {
+  //     SplashScreen.hideAsync();
+  //     router.replace('/sign-in');
+  //   }
+  // }, [loaded]);
 
   if (!loaded) {
     return null;
@@ -34,9 +34,7 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
-        <Stack.Screen name="humanresource" options={{ headerShown: false }} /> {/* Màn hình humanresource */}
-        <Stack.Screen name="patients" options={{ headerShown: false }} /> {/* Màn hình patients */} 
-
+        <Stack.Screen name="(humanresource)" options={{ headerShown: true }} /> {/* Màn hình humanresource */}
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />  

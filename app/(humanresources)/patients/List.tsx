@@ -149,7 +149,7 @@ export default function List() {
       </ScrollView>
 
       <TouchableOpacity style={styles.button} onPress={handleAddPatient}>
-        <Text style={styles.buttonText}>Thêm bệnh nhân</Text>
+        <Text style={styles.buttonText}>Add Patient</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );

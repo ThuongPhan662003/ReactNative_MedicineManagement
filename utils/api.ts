@@ -1,6 +1,6 @@
 // utils/api.ts
 import axios from 'axios';
-const SERVER_URL = "http://192.168.1.18:5000/api"; // Thay bằng URL server Python của bạn
+const SERVER_URL = "http://192.168.1.6:8000/api"; // Thay bằng URL server Python của bạn
 async function apiRequest(endpoint: string, method: string = "GET", body: object | null = null): Promise<any> {
   try {
     console.log("api request");

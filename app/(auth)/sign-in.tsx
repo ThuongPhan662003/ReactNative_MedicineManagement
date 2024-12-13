@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import loginLogin from '../../constants/images';
 import FormField from '@/components/FormField';
 import CustomButton from '@/components/button/CustomButton';
@@ -39,6 +39,7 @@ const SignIn = () => {
       if (response.ok) {
         // Xử lý đăng nhập thành công
         Alert.alert('Thành công', 'Đăng nhập thành công!');
+        router.replace("/human-manage")
         console.log('User Info:', data);
         // Chuyển hướng hoặc lưu token
       } else {

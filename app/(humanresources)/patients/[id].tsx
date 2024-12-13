@@ -31,30 +31,31 @@ const PatientDetail = () => {
   } = useAppwrite(getPatientById, [id], true); // Truyền id trong mảng làm dependency
 
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [employee, setEmployee] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState(""); // Đổi thành dateOfBirth
-  const [insurance, setInsurance] = useState(""); // Nếu bạn cần insurance, thêm vào đây.
-  const [id_card, setIdCard] = useState(""); 
-  const [registration_date, setRegistration] = useState(""); 
+  const [name, setName] = useState(patient?.full_name || "");  // full_name
+const [email, setEmail] = useState(patient?.email || "");
+const [phone, setPhone] = useState(patient?.phone_number || ""); // phone_number
+const [address, setAddress] = useState(patient?.address || "");
+const [employee, setEmployee] = useState(String(patient?.employee || ""));
+const [dateOfBirth, setDateOfBirth] = useState(patient?.date_of_birth?.toString() || "");
+const [insurance, setInsurance] = useState(patient?.insurance || "");
+const [id_card, setIdCard] = useState(patient?.id_card || "");
+const [registration_date, setRegistration] = useState(patient?.registration_date?.toString() || "");
+
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState<any>(null);
 
   // Update state when patient data is fetched
   useEffect(() => {
     if (patient) {
-      setName(patient.full_name); // full_name là trường đúng trong Patient
-      setEmail(patient.email);
-      setPhone(patient.phone_number); // phone_number là trường đúng trong Patient
-      setAddress(patient.address);
-      setEmployee(String(patient.employee)); // employee là kiểu number, phải chuyển thành string
-      setDateOfBirth(patient.date_of_birth.toString()); // date_of_birth là kiểu Date, chuyển thành string
-      setInsurance(String(patient.insurance));
-      setIdCard(patient.id_card)
-      setRegistration(patient.registration_date)
+      setName(patient.full_name); 
+    setEmail(patient.email);
+    setPhone(patient.phone_number); 
+    setAddress(patient.address);
+    setEmployee(String(patient.employee)); 
+    setDateOfBirth(patient.date_of_birth?.toString() || "");
+    setInsurance(patient.insurance);
+    setIdCard(patient.id_card);
+    setRegistration(patient.registration_date?.toString() || "");
     }
   }, [patient]);
 
@@ -114,6 +115,13 @@ const PatientDetail = () => {
 
   return (
     <View style={styles.container}>
+      <Nav
+        title="PATIENT MANAGEMENT"
+        externalLink="patients/details"
+        name="back"
+        color="#FFFFFF"
+        status={true}
+      />
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <Text style={styles.header}>Patient Information</Text>
         <TouchableOpacity onPress={isEditing ? handleSave : handleEdit}>
@@ -155,7 +163,7 @@ const PatientDetail = () => {
 
         {/* Address */}
         <ThemedText>
-          <IconComponent name="address" size={20} color="#767676" />
+          <IconComponent name="location" size={20} color="#767676" />
           <TextInput
             style={styles.input}
             value={address}

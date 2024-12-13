@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
-
+import  {} from 'react'
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -20,7 +20,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
-      router.push("/sign-in");
+      router.replace('/sign-in');
     }
   }, [loaded]);
 
@@ -33,8 +33,10 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
         <Stack.Screen name="humanresource" options={{ headerShown: false }} /> {/* Màn hình humanresource */}
         <Stack.Screen name="patients" options={{ headerShown: false }} /> {/* Màn hình patients */} 
+
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />  

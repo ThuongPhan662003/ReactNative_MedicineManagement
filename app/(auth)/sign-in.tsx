@@ -39,16 +39,19 @@ const SignIn = () => {
 
       if (response.ok) {
         await lib.auth.saveAuthToken(data.token); // Lưu token
+
         await lib.auth.saveUserId(data.employee_id);
         const token = await lib.auth.getAuthToken(); // Lấy token vừa lưu
         const id = await lib.auth.getUserId();
+        
         console.log('Token user:', token);
         // Xử lý đăng nhập thành công
         Alert.alert('Thành công', 'Đăng nhập thành công!');
         router.replace("/human-manage")
         console.log('User Info:', data);
         console.log('Token User: ', token);
-        console.log('Token User: ', id);
+        console.log('User_id: ', id);
+
         // router.push('/patients/List' )
         // Chuyển hướng hoặc lưu token
       } else {

@@ -3,7 +3,7 @@ import React from "react";
 import { ScrollView, View, StyleSheet, Button } from "react-native";
 import Nav from "@/components/Nav";
 import CircleButton from "@/components/CircleButton";
-import { GiMedicinePills } from "react-icons/gi";
+// import { GiMedicinePills } from "react-icons/gi";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import SearchBar from "@/components/SearchBar";
 import { useNavigation } from "expo-router";
@@ -19,10 +19,10 @@ const HomeScreen = ({}) => {
 
       <Nav
         title="HUMAN MANAGEMENT"
-        externalLink="humanresources/doctors/doctors"
+        // externalLink="humanresources/doctors/doctors"
         name="back"
         color="#FFFFFF"
-        status={true}
+        status={false}
       />
       
       {/* Màn hình chính chứa các CircleButton */}

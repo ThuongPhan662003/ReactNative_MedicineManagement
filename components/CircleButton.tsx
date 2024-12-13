@@ -1,9 +1,14 @@
-// components/CircleButton.tsx
+
 import { router, useRouter } from 'expo-router';
+
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Linking } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Linking, Alert } from 'react-native';
 import IconComponent from '@/components/IconComponent'; // Import IconComponent
+
+import { Link } from 'expo-router'; // Import Link for internal navigation
+
 import { useNavigation, RouteProp } from '@react-navigation/native';
+
 
 interface CircleButtonProps {
   iconName: string; // Tên icon từ IconComponent
@@ -24,12 +29,14 @@ const CircleButton: React.FC<CircleButtonProps> = ({
   color = 'black', // Màu mặc định là đen nếu không truyền màu
   path,
 }) => {
+
   const router = useRouter();
+
 
   return (
     <TouchableOpacity style={[styles.container, { width: size, height: size }]} onPress={() => router.push(path)}>
       <View
-        style={[styles.outerCircle, { width: size, height: size, backgroundColor: backgroundColor, borderColor: borderColor }]}>
+        style={[styles.outerCircle, { width: size, height: size, backgroundColor: backgroundColor, borderColor: borderColor }]} >
         <View style={[styles.innerCircle, { width: size * 0.6, height: size * 0.6 }]}>
           <IconComponent
             name={iconName} // Truyền tên icon

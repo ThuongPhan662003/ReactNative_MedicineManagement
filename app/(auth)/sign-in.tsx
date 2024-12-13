@@ -49,10 +49,12 @@ const SignIn = () => {
         Alert.alert('Thành công', 'Đăng nhập thành công!');
         router.replace("/human-manage")
         console.log('User Info:', data);
+
         console.log('Token User: ', token);
         console.log('User_id: ', id);
 
         // router.push('/patients/List' )
+
         // Chuyển hướng hoặc lưu token
       } else {
         // Xử lý lỗi đăng nhập

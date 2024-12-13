@@ -5,6 +5,7 @@ import { Link, router } from "expo-router";
 import loginLogin from '../../constants/images';
 import FormField from '@/components/FormField';
 import CustomButton from '@/components/button/CustomButton';
+import lib from '@/lib'
 
 const SignIn = () => {
   const [form, setForm] = useState({
@@ -37,10 +38,18 @@ const SignIn = () => {
       const data = await response.json();
 
       if (response.ok) {
+        await lib.auth.saveAuthToken(data.token); // Lưu token
+        await lib.auth.saveUserId(data.employee_id);
+        const token = await lib.auth.getAuthToken(); // Lấy token vừa lưu
+        const id = await lib.auth.getUserId();
+        console.log('Token user:', token);
         // Xử lý đăng nhập thành công
         Alert.alert('Thành công', 'Đăng nhập thành công!');
+        router.replace("/human-manage")
         console.log('User Info:', data);
-        router.push('/patients/List' )
+        console.log('Token User: ', token);
+        console.log('Token User: ', id);
+        // router.push('/patients/List' )
         // Chuyển hướng hoặc lưu token
       } else {
         // Xử lý lỗi đăng nhập

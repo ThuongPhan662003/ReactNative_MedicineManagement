@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -20,6 +20,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
+      router.push("/sign-in");
     }
   }, [loaded]);
 
@@ -30,10 +31,10 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(humaresources)" options={{headerShown: false }} />
+        <Stack.Screen name="humanresource" options={{ headerShown: false }} /> {/* Màn hình humanresource */}
+        <Stack.Screen name="patients" options={{ headerShown: false }} /> {/* Màn hình patients */} 
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />  

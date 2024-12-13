@@ -41,6 +41,7 @@ const SignIn = () => {
         Alert.alert('Thành công', 'Đăng nhập thành công!');
         router.replace("/human-manage")
         console.log('User Info:', data);
+        router.push('/patients/List' )
         // Chuyển hướng hoặc lưu token
       } else {
         // Xử lý lỗi đăng nhập

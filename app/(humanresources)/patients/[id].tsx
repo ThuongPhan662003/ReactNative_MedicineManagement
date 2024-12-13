@@ -7,94 +7,106 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
-import { getPatientById, updatePatientByField } from "@/services/patientService"; // Import hàm API
-import useAppwrite from "@/lib/useAppwrite"; // Import useAppwrite
-import { Patient } from "@/constants/types"; // Import định nghĩa Patient từ file khác
-import { ThemedText } from "@/components/ThemedText";
+import { useRoute, useNavigation } from "@react-navigation/native";
+import {
+  getPatientById,
+  updatePatientByField,
+  deletePatient,
+} from "@/services/patientService";
+import { Patient } from "@/constants/types";
+import Nav from "@/components/Nav";
+import { ThemedView } from "@/components/ThemedView";
 import IconComponent from "@/components/IconComponent";
 
 type PatientDetailRouteParams = {
-  id: string; // ID của bệnh nhân từ route params
+  id: string;
 };
 
 const PatientDetail = () => {
   const route = useRoute();
+  const navigation = useNavigation();
   const { id } = route.params as PatientDetailRouteParams;
 
-  // Fetch patient details using useAppwrite
-  const {
-    data: patient,
-    loading: fetchLoading,
-    error: fetchError,
-  } = useAppwrite(getPatientById, [id], true); // Truyền id trong mảng làm dependency
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [employee, setEmployee] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState(""); // Đổi thành dateOfBirth
-  const [insurance, setInsurance] = useState(""); // Nếu bạn cần insurance, thêm vào đây.
-  const [id_card, setIdCard] = useState(""); 
-  const [registration_date, setRegistration] = useState(""); 
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [formData, setFormData] = useState<Partial<Patient>>({});
   const [updateLoading, setUpdateLoading] = useState(false);
-  const [updateError, setUpdateError] = useState<any>(null);
 
-  // Update state when patient data is fetched
   useEffect(() => {
-    if (patient) {
-      setName(patient.full_name); // full_name là trường đúng trong Patient
-      setEmail(patient.email);
-      setPhone(patient.phone_number); // phone_number là trường đúng trong Patient
-      setAddress(patient.address);
-      setEmployee(String(patient.employee)); // employee là kiểu number, phải chuyển thành string
-      setDateOfBirth(patient.date_of_birth.toString()); // date_of_birth là kiểu Date, chuyển thành string
-      setInsurance(String(patient.insurance));
-      setIdCard(patient.id_card)
-      setRegistration(patient.registration_date)
-    }
-  }, [patient]);
+    Alert.alert("Test", "This is a test alert.");
+    const fetchPatient = async () => {
+      try {
+        setLoading(true);
+        const data = await getPatientById(id);
+        setPatient(data);
+        setFormData({
+          ...data,
+          // date_of_birth: data.date_of_birth?.toString(),
+          // registration_date: data.registration_date?.toString(),
+        });
+      } catch (error) {
+        Alert.alert("Error", "Failed to fetch patient details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPatient();
+  }, [id]);
 
-  // Handle Save button click
   const handleSave = async () => {
-    setUpdateLoading(true);
-    setUpdateError(null);
-
     try {
-      const updatedData = {
-        id: patient.id, // Lấy id từ patient
-        full_name: name, // Dùng name cho full_name
-        email: email,
-        phone_number: phone, // phone_number đúng với Patient
-        address: address,
-        employee: parseInt(employee), // employee là kiểu number
-        date_of_birth: new Date(dateOfBirth), // date_of_birth là kiểu Date
-        insurance: insurance, // Nếu có insurance, thêm vào
-        id_card: patient.id_card, // id_card đúng với Patient
-        registration_date: patient.registration_date,
+      setUpdateLoading(true);
+      console.log("save")
+      const formattedData = {
+        ...formData,
+        // date_of_birth: new Date(formData.date_of_birth || "").toISOString(),
+        // registration_date: new Date(
+        //   formData.registration_date || ""
+        // ).toISOString(),
       };
 
-      // Perform the update API call
-      const result = await updatePatientByField(id, updatedData);
-
-      if (result) {
-        setIsEditing(false);
-      }
-    } catch (err) {
-      setUpdateError(err);
-      console.error("Update failed:", err);
+      await updatePatientByField(id, formattedData);
+      console.log("ưait")
+      setTimeout(() => {
+      Alert.alert("Success", "Patient details updated successfully.");
+    }, 500);
+      setIsEditing(false);  // Sau khi lưu, chuyển về chế độ không sửa
+    } catch (error) {
+      console.log("đang loi ne")
+      Alert.alert("Error", "Failed to update patient details.");
     } finally {
       setUpdateLoading(false);
     }
   };
 
-  // Handle Edit button click
-  const handleEdit = () => setIsEditing(true);
+  const handleDelete = async () => {
+    try {
+      console.log("delete start")
+    await deletePatient(id);
+    console.log("delete đó")  // Gọi API xóa bệnh nhân
+    Alert.alert("Success", "Patient deleted successfully.");
+    navigation.goBack();  // Quay lại màn hình trước đó sau khi xóa
+  } catch (error) {
+    // Nếu lỗi xảy ra, hiển thị thông tin chi tiết từ lỗi
+    const errorMessage = error?.response?.data || "Failed to delete patient.";
+    Alert.alert("Error", errorMessage);
+    console.error("Error deleting patient with id", id, error);  // Log chi tiết lỗi
+  }
+  };
 
-  if (fetchLoading) {
+  // Chuyển đổi chế độ chỉnh sửa và lưu
+  const handleEditToggle = () => {
+    console.log("edit start");
+    if (!loading) {  // Đảm bảo không có trạng thái loading mới cho phép chuyển đổi
+      setIsEditing((prev) => !prev);
+      console.log("isEditing toggled:", !isEditing); // Log trạng thái
+    }
+  };
+
+  if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#6200EE" />
@@ -102,105 +114,83 @@ const PatientDetail = () => {
     );
   }
 
-  if (fetchError) {
+  if (!patient) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>
-          Error: {fetchError?.message}
-        </Text>
+        <Text style={styles.errorText}>Patient data not found.</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      <Nav
+        title={`${patient.id} - ${patient.full_name}`}
+        externalLink="/patients/List"
+        name="back"
+        color="#FFFFFF"
+        status={true}
+      />
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.header}>Patient Information</Text>
-        <TouchableOpacity onPress={isEditing ? handleSave : handleEdit}>
-          <Text style={styles.editButton}>{isEditing ? "Save" : "Edit"}</Text>
-        </TouchableOpacity>
+        <ThemedView style={[styles.headertitle]}>
+          <Text style={styles.header}>Patient Information</Text>
+          <View style={styles.buttonsContainer}>
+            {/* Nút chỉnh sửa hoặc lưu */}
+            <TouchableOpacity onPress={isEditing ? handleSave : handleEditToggle}>
+              <Text style={styles.editButton}>
+                {isEditing ? "Save" : "Edit"}
+              </Text>
+            </TouchableOpacity>
 
-        {/* Full Name */}
-        <ThemedText>
-          <IconComponent name="birthday" size={20} color="#767676" />
+            {/* Nút xóa khi đang ở chế độ chỉnh sửa */}
+            {isEditing && (
+              <TouchableOpacity onPress={handleDelete}>
+                <Text style={styles.deleteButton}>Delete</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </ThemedView>
+
+        {/* Duyệt qua các trường để hiển thị thông tin */}
+        {[ 
+          { label: "Full Name", value: "full_name" },
+          { label: "Email", value: "email" },
+          { label: "Phone", value: "phone_number" },
+          { label: "Address", value: "address" },
+          { label: "Employee ID", value: "employee" },
+          { label: "Date of Birth", value: "date_of_birth" },
+          { label: "Insurance", value: "insurance" },
+          { label: "ID Card", value: "id_card" },
+          { label: "Registration Date", value: "registration_date" },
+        ].map((field) => (
+          <View key={field.value} style={styles.inputContainer}>
+            <Text style={styles.label}>{field.label}</Text>
+            
+            <TextInput
+              style={styles.input}
+              value={formData[field.value]?.toString() || ""}
+              editable={isEditing}  // Chỉ cho phép chỉnh sửa khi isEditing là true
+              onChangeText={(text) =>
+                setFormData({ ...formData, [field.value]: text })
+              }
+            />
+          </View>
+        ))}
+
+        {/* Gender */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Gender</Text>
           <TextInput
             style={styles.input}
-            value={name}
-            editable={isEditing}
-            onChangeText={setName}
+            value={formData.gender ? "Male" : "Female"}
+            editable={isEditing}  // Chỉ cho phép chỉnh sửa khi isEditing là true
+            onChangeText={(value) =>
+              setFormData({ ...formData, gender: value === "Male" })
+            }
           />
-        </ThemedText>
-
-        {/* Email */}
-        <ThemedText>
-          <IconComponent name="idCard" size={20} color="#767676" />
-          <TextInput
-            style={styles.input}
-            value={email}
-            editable={isEditing}
-            onChangeText={setEmail}
-          />
-        </ThemedText>
-
-        {/* Phone */}
-        <ThemedText>
-          <IconComponent name="phone" size={20} color="#767676" />
-          <TextInput
-            style={styles.input}
-            value={phone}
-            editable={isEditing}
-            onChangeText={setPhone}
-          />
-        </ThemedText>
-
-        {/* Address */}
-        <ThemedText>
-          <IconComponent name="address" size={20} color="#767676" />
-          <TextInput
-            style={styles.input}
-            value={address}
-            editable={isEditing}
-            onChangeText={setAddress}
-          />
-        </ThemedText>
-
-        {/* Date of Birth */}
-        <ThemedText>
-          <IconComponent name="birthday" size={20} color="#767676" />
-          <TextInput
-            style={styles.input}
-            value={dateOfBirth}
-            editable={isEditing}
-            onChangeText={setDateOfBirth}
-          />
-        </ThemedText>
-
-        {/* Employee */}
-        <ThemedText>
-          <IconComponent name="employee" size={20} color="#767676" />
-          <TextInput
-            style={styles.input}
-            value={employee}
-            editable={isEditing}
-            onChangeText={setEmployee}
-          />
-        </ThemedText>
-
-        {/* Insurance */}
-        <ThemedText>
-          <IconComponent name="insurance" size={20} color="#767676" />
-          <TextInput
-            style={styles.input}
-            value={insurance}
-            editable={isEditing}
-            onChangeText={setInsurance}
-          />
-        </ThemedText>
+        </View>
 
         {updateLoading && <ActivityIndicator size="large" color="#6200EE" />}
-        {updateError && (
-          <Text style={styles.errorText}>Error updating patient: {updateError.message}</Text>
-        )}
       </ScrollView>
     </View>
   );
@@ -221,33 +211,59 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   header: {
-    fontSize: 17,
-    fontWeight: "500",
+    fontSize: 20,
+    fontWeight: 500,
     textAlign: "center",
-    marginBottom: 20,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
+  inputContainer: {
+    marginBottom: 15,
+    display:"flex",
+    flexDirection:"row"
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 5,
   },
   input: {
     height: 40,
     borderColor: "#ccc",
     borderWidth: 1,
-    marginBottom: 10,
+    borderRadius: 5,
     paddingHorizontal: 10,
   },
   editButton: {
     fontSize: 16,
     color: "#007BFF",
     textAlign: "center",
-    marginBottom: 20,
+    alignItems: "center",
+    alignContent:"center"
+  },
+  deleteButton: {
+    fontSize: 16,
+    color: "#E53935",
+    textAlign: "center",
+    // marginTop: 10,
+    alignContent:"center"
   },
   errorText: {
     color: "#E53935",
     fontSize: 18,
     textAlign: "center",
+  },
+  headertitle: {
+    display: "flex",
+    flexDirection: "row",
+    textAlign: "center",
+    alignContent: "center",
+    backgroundColor: "#F0F0F0",
+    gap:20
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap:20
+    // marginTop: 10,
   },
 });
 

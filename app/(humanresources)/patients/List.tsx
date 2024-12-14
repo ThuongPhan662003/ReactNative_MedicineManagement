@@ -8,29 +8,26 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
 } from "react-native";
-import SearchBar from "@/components/SearchBar"; // Đảm bảo SearchBar được import
+import SearchBar from "@/components/SearchBar";
 import Nav from "@/components/Nav";
 import { Link, router } from "expo-router";
-import IconComponent from "@/components/IconComponent";
-import { searchPatients } from "@/services/patientService"; // Import hàm searchPatients
-import CustomButton from "@/components/button/CustomButton";
-import { ExternalLink } from "@/components/ExternalLink";
+import { searchPatients } from "@/services/patientService";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 
 export default function List() {
   const [patients, setPatients] = useState<any[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
 
-  // Fetch dữ liệu bệnh nhân từ API qua hàm getPatients
   const fetchPatients = async () => {
     setLoading(true);
     setError("");
     try {
-      const data = await searchPatients({ search: "" }); // Lấy tất cả bệnh nhân ban đầu
+      const data = await searchPatients({ search: "" });
       setPatients(data);
       setFilteredPatients(data);
     } catch (err) {
@@ -46,49 +43,35 @@ export default function List() {
 
   const handleSearchPatients = async (text: string) => {
     setSearchTerm(text);
-    if (text === "") {
-      // Nếu không có tìm kiếm, hiển thị lại tất cả bệnh nhân
+    if (text.trim() === "") {
       setFilteredPatients(patients);
     } else {
-      // Gọi hàm searchPatients để tìm kiếm bệnh nhân theo từ khóa
       setLoading(true);
       try {
         const result = await searchPatients({ search: text });
-        setFilteredPatients(result); // Cập nhật danh sách bệnh nhân sau khi tìm kiếm
+        setFilteredPatients(result);
       } catch (err) {
-        setError('Error searching patients');
-        console.error(err);
+        setError("Error searching patients");
       } finally {
         setLoading(false);
       }
     }
   };
 
-  const handleClear = () => {
-    setFilteredPatients(patients);
-    setSearchTerm("");
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchPatients();
+    } catch (err) {
+      setError("Error refreshing patients");
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const handleAddPatient = () => {
-    // Điều hướng đến trang "add-patient"
-    router.push('/patients/add');
+    router.push("/patients/add");
   };
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6200EE" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Error: {error}</Text>
-      </View>
-    );
-  }
 
   return (
     <KeyboardAvoidingView
@@ -98,7 +81,7 @@ export default function List() {
       <Nav
         title="PATIENT"
         externalLink="patients/details"
-        name="back"
+        name="chevron.right"
         color="#FFFFFF"
         status={false}
       />
@@ -106,25 +89,38 @@ export default function List() {
       <SearchBar
         place="ID, Patient’s name"
         onSearch={handleSearchPatients}
-        onClear={handleClear}
+        onClear={() => {
+          setSearchTerm("");
+          setFilteredPatients(patients);
+        }}
         searchTerm={searchTerm}
         onSearchTermChange={setSearchTerm}
       />
 
-      <ScrollView style={styles.container}>
+      {loading && !refreshing ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#6200EE" />
+        </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Error: {error}</Text>
+        </View>
+      ) : (
         <FlatList
           data={filteredPatients}
           keyExtractor={(item) => item.id.toString()}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
           contentContainerStyle={styles.listContainer}
           ListHeaderComponent={
-            <View>
-              <View style={styles.rowContainer}>
-                <Text style={[styles.headercolumn, styles.cellText]}>ID</Text>
-                <Text style={[styles.headercolumn, styles.fullNameText]}>
-                  Full name
-                </Text>
-                <Text style={[styles.headercolumn, styles.detailText]}>Detail</Text>
-              </View>
+            <View style={styles.headerContainer}>
+              <Text style={[styles.headercolumn, styles.cellText]}>ID</Text>
+              <Text style={[styles.headercolumn, styles.fullNameText]}>
+                Full name
+              </Text>
+              <Text style={[styles.headercolumn, styles.detailText]}>
+                Detail
+              </Text>
             </View>
           }
           renderItem={({ item }) => (
@@ -133,20 +129,19 @@ export default function List() {
               <Text style={[styles.column, styles.fullNameText]}>
                 {item.full_name}
               </Text>
-              <Text style={[styles.column, styles.detailText]}>
-                <Link
-                  href={{
-                    pathname: "/patients/[id]",
-                    params: { id: `${item.id}` },
-                  }}
-                >
-                  <IconComponent name={"detail"} size={20} color="#000000" />
-                </Link>
-              </Text>
+              <Link
+                href={{
+                  pathname: "/patients/[id]",
+                  params: { id: `${item.id}` },
+                }}
+                style={[styles.column, styles.detailText]}
+              >
+                <IconSymbol size={28} name="house.fill" color={"#000000"} />
+              </Link>
             </View>
           )}
         />
-      </ScrollView>
+      )}
 
       <TouchableOpacity style={styles.button} onPress={handleAddPatient}>
         <Text style={styles.buttonText}>Add Patient</Text>
@@ -156,13 +151,9 @@ export default function List() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
+  listContainer: {
     padding: 16,
     backgroundColor: "#F0F0F0",
-  },
-  listContainer: {
-    paddingBottom: 16,
   },
   rowContainer: {
     flexDirection: "row",
@@ -176,15 +167,19 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "left",
     fontSize: 16,
-    fontWeight: "400",
     color: "#000000",
-    justifyContent: "center",
+  },
+  headerContainer: {
+    flexDirection: "row",
+    paddingBottom: 8,
+    borderBottomWidth: 2,
+    borderColor: "#6200EE",
+    backgroundColor: "#F8F8F8",
+    paddingHorizontal: 5,
   },
   headercolumn: {
-    flex: 1,
-    textAlign: "left",
     fontSize: 16,
-    fontWeight: "400",
+    fontWeight: "bold",
     color: "#AFAFAF",
   },
   cellText: {
@@ -211,23 +206,18 @@ const styles = StyleSheet.create({
   errorText: {
     color: "#E53935",
     fontSize: 18,
-    fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
   },
   button: {
-    backgroundColor: '#005EB5',
+    backgroundColor: "#005EB5",
     paddingVertical: 10,
-    paddingHorizontal: 20,
     borderRadius: 5,
-    width: "40%",
-    textAlign: "center",
-    marginBottom: 30,
     alignSelf: "center",
+    marginVertical: 20,
   },
   buttonText: {
-    color: '#fff',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });

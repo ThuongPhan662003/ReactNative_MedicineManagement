@@ -21,20 +21,18 @@ client.interceptors.request.use(async (config) => {
 });
 
 // Hàm gọi API cho đăng nhập
-const login = async (credentials) => {
-
+export const login = async (username: string, password: string) => {
     try {
-        const response = await client.post(apiConfig.login, credentials);
-        
-        await saveAuthToken(response.data.token);
-        await saveUserId(response.data.employee_id); 
-        
-        return response.data; // Trả về toàn bộ dữ liệu từ API nếu cần
+      const response = await axios.post(`${API_BASE_URL}/accounts/accounts/login/`, {
+        username,
+        password,
+      });
+      return response.data; // Trả về dữ liệu từ API (token, thông tin người dùng, ...)
     } catch (error) {
-        console.error('Error logging in:', error);
-        throw error;
+      console.error('Error during login:', error);
+      throw error;
     }
-};
+  };
 
 export default { login };
 

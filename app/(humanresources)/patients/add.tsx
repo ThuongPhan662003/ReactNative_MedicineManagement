@@ -25,6 +25,7 @@ const AddPatient = () => {
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
+    nguoi_giam_ho: "",
     phone_number: "",
     address: "",
     employee: employee_id, // Default to logged-in employee's ID
@@ -111,6 +112,7 @@ const AddPatient = () => {
         {[
           { label: "Full Name", value: "full_name", icon: "user" },
           { label: "ID Card", value: "id_card", icon: "idCard" },
+          { label: "Người giám hộ", value: "email", icon: "idCard" },
           { label: "Email", value: "email", icon: "idCard" },
           { label: "Phone", value: "phone_number", icon: "phone" },
           { label: "Address", value: "address", icon: "location" },

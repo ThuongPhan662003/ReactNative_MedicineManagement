@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { ExternalLink } from '@/components/ExternalLink';  // Import ExternalLink từ thư viện expo-router
 import IconComponent from '@/components/IconComponent'; // Import IconComponent
+import { IconSymbol } from './ui/IconSymbol';
 
 interface NavProps {
   title: string; // Tiêu đề cho thanh điều hướng
@@ -19,9 +20,12 @@ const Nav: React.FC<NavProps> = ({ title, children, name, externalLink, status =
       {name && status && externalLink && (
         <ExternalLink href={externalLink}>  {/* Sử dụng ExternalLink để mở liên kết ngoài */}
           <TouchableOpacity style={styles.iconContainer}>
-            <IconComponent name={name} size={30} color={color} />
+            {/* <IconComponent name={name} size={30} color={color} /> */}
+            <IconSymbol size={35} name={name} color={"#FFFFFF"} />
+
           </TouchableOpacity>
         </ExternalLink>
+        
       )}
 
       {/* Tiêu đề thanh điều hướng */}

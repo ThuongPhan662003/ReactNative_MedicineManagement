@@ -89,10 +89,7 @@ const HomeScreen = ({}) => {
       )}
         </View>
       </ScrollView>
-      <Button
-        title="Go to Profile"
-        onPress={() => navigation.navigate('PatientList')} // Điều hướng đến màn hình Profile
-      />
+      
     </View>
   );
 };

@@ -43,6 +43,7 @@ const IconComponent: React.FC<IconComponentProps> = ({ name, size = 24, color = 
 
   const handlePress = () => {
     if (route) {
+      console.log("router",route)
       router.push(route); // Điều hướng đến route được chỉ định
     }
   };

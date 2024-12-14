@@ -62,43 +62,75 @@ const PatientDetail = () => {
     const year = d.getFullYear();
     return `${day}/${month}/${year}`;
   };
+const handleSave = async () => {
+  try {
+    // Bật chế độ loading để hiển thị quá trình cập nhật
+    setUpdateLoading(true);
 
-  const handleSave = async () => {
-    try {
-      setUpdateLoading(true);
-      const formattedData = {
-        ...formData,
-      };
+    // Đảm bảo dữ liệu đã được format trước khi gửi
+    const formattedData = { ...formData };
 
-      // Clear previous error messages
-      setErrorMessages({});
+    // Xóa các thông báo lỗi cũ trước khi gọi API
+    setErrorMessages({});
 
-      // Call API to update patient details
-      await updatePatientByField(id, formattedData);
-      Alert.alert("Success", "Patient details updated successfully.");
-      setIsEditing(false); // After save, switch to non-editing mode
-    } catch (error) {
-      const errorResponse = error?.response?.data;
-      if (errorResponse) {
-        setErrorMessages(errorResponse); // Set error messages based on the response
-      } else {
-        Alert.alert("Error", "Failed to update patient details.");
-      }
-    } finally {
-      setUpdateLoading(false);
+    // Gọi API để cập nhật dữ liệu bệnh nhân
+    await updatePatientByField(id, formattedData);
+
+    // Hiển thị thông báo thành công
+    Alert.alert("Success", "Patient details updated successfully.");
+
+    // Tắt chế độ chỉnh sửa sau khi lưu thành công
+    setIsEditing(false);
+  } catch (error: any) {
+    // Xử lý lỗi từ API
+    if (error.response && error.response.data) {
+      // Lấy thông báo lỗi từ phản hồi của API
+      const apiErrors = error.response.data;
+
+      // Biến để lưu trữ thông báo lỗi cho Alert
+      let alertMessage = "";
+      const formattedErrorMessages: { [key: string]: string[] } = {};
+
+      // Duyệt qua tất cả các trường có lỗi và chuẩn bị thông báo
+      Object.keys(apiErrors).forEach((key) => {
+        const errorMessages = apiErrors[key];
+        alertMessage += `${key}: ${errorMessages.join(", ")}\n`;
+        formattedErrorMessages[key] = errorMessages; // Lưu lỗi cho từng trường
+      });
+
+      // Hiển thị lỗi trong Alert
+      Alert.alert("Validation Errors", alertMessage);
+
+      // Lưu lại lỗi để hiển thị dưới các trường nhập liệu
+      setErrorMessages(formattedErrorMessages);
+    } else {
+      // Nếu có lỗi không xác định từ API
+      Alert.alert("Error", "An unexpected error occurred. Please try again.");
     }
-  };
+  } finally {
+    // Tắt chế độ loading sau khi hoàn thành
+    setUpdateLoading(false);
+  }
+};
 
   const handleDelete = async () => {
-    try {
-      await deletePatient(id);
-      Alert.alert("Success", "Patient deleted successfully.");
-      navigation.goBack(); // Go back after deleting
-    } catch (error) {
-      const errorMessage = error?.response?.data || "Failed to delete patient.";
-      Alert.alert("Error", errorMessage);
+  try {
+    await deletePatient(id);
+    Alert.alert("Success", "Patient deleted successfully.");
+    navigation.goBack(); // Go back after deleting
+  } catch (error: any) {
+    // Check if the error is a response error from the API
+    if (error.response && error.response.data) {
+      const errorMessage = error.response.data.message || "Unknown error occurred.";
+      Alert.alert("Error", `Failed to delete patient: ${errorMessage}`);
+    } else {
+      // If there's no specific error message from the API, fallback to a general error
+      Alert.alert("Error", "An unexpected error occurred while deleting the patient.");
     }
-  };
+  }
+};
+
+
 
   const handleEditToggle = () => {
     if (!loading) {
@@ -127,7 +159,7 @@ const PatientDetail = () => {
       <Nav
         title={`${patient.id} - ${patient.full_name}`}
         externalLink="/patients/List"
-        name="back"
+        name="chevron.right"
         color="#FFFFFF"
         status={true}
       />

@@ -15,12 +15,11 @@ import { addPatient } from "@/services/patientService"; // Import the service fo
 import IconComponent from "@/components/IconComponent"; // Import IconComponent
 import Nav from "@/components/Nav";
 import DateTimePicker from "@react-native-community/datetimepicker"; // Import DateTimePicker
-
+import { useGlobalContext } from "@/context/GlobalContext";
 const AddPatient = () => {
   const navigation = useNavigation();
-
-  // Assuming you have a way to get the logged-in user ID
-  const loggedInEmployeeId = 1; // Replace this with actual logged-in user ID (e.g., from context or auth service)
+  const { isLogged, employee_id, token, setIsLogged, setEmployeeId, setToken } =
+    useGlobalContext();
 
   // Initialize the state with default values
   const [formData, setFormData] = useState({
@@ -28,7 +27,7 @@ const AddPatient = () => {
     email: "",
     phone_number: "",
     address: "",
-    employee: loggedInEmployeeId, // Default to logged-in employee's ID
+    employee: employee_id, // Default to logged-in employee's ID
     date_of_birth: new Date(), // Default to today's date
     insurance: "",
     id_card: "",
@@ -63,19 +62,22 @@ const AddPatient = () => {
       const formattedDateOfBirth = formatDateForApi(formData.date_of_birth);
 
       // Update formData with the formatted date
-      const updatedFormData = { ...formData, date_of_birth: formattedDateOfBirth };
+      const updatedFormData = {
+        ...formData,
+        date_of_birth: formattedDateOfBirth,
+      };
 
-      await addPatient(updatedFormData);  // Call the service to add a new patient
+      await addPatient(updatedFormData); // Call the service to add a new patient
 
       Alert.alert("Success", "Patient added successfully.");
-      navigation.goBack();  // Go back after successful submission
+      navigation.goBack(); // Go back after successful submission
     } catch (error) {
       if (error.response) {
         // If error is an API response with validation errors
         const errorMessages = error.response.data;
         const message = Object.keys(errorMessages)
-          .map((key) => `${key}: ${errorMessages[key].join(', ')}`)
-          .join('\n');
+          .map((key) => `${key}: ${errorMessages[key].join(", ")}`)
+          .join("\n");
         Alert.alert("Error", message); // Show detailed error message
       } else {
         // Handle other types of errors
@@ -101,12 +103,12 @@ const AddPatient = () => {
       <Nav
         title="PATIENT"
         externalLink="/patients/List"
-        name="back"
+        name="chevron.right"
         color="#FFFFFF"
         status={true}
       />
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        {[ 
+        {[
           { label: "Full Name", value: "full_name", icon: "user" },
           { label: "ID Card", value: "id_card", icon: "idCard" },
           { label: "Email", value: "email", icon: "idCard" },
@@ -119,7 +121,9 @@ const AddPatient = () => {
             <TextInput
               style={styles.input}
               value={formData[field.value]}
-              onChangeText={(text) => setFormData({ ...formData, [field.value]: text })}
+              onChangeText={(text) =>
+                setFormData({ ...formData, [field.value]: text })
+              }
             />
           </View>
         ))}
@@ -158,7 +162,11 @@ const AddPatient = () => {
           />
         )}
 
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={loading}>
+        <TouchableOpacity
+          style={styles.saveButton}
+          onPress={handleSave}
+          disabled={loading}
+        >
           {loading ? (
             <ActivityIndicator size="small" color="#ffffff" />
           ) : (
@@ -203,8 +211,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 20,
     alignItems: "center",
-    width:"60%",
-    margin:"auto"
+    width: "60%",
+    margin: "auto",
   },
   saveButtonText: {
     color: "#fff",
